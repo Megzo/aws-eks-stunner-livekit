@@ -1,0 +1,17 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: stunner-livekit
+  region: eu-central-1
+
+iam:
+  withOIDC: true
+
+nodeGroups:
+  - name: ng-1
+    instanceType: t3.medium
+    desiredCapacity: 3
+    volumeSize: 100
+    ssh:
+      publicKeyPath: ~/.ssh/id_rsa.pub

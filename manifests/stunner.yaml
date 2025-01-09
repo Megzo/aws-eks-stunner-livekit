@@ -1,0 +1,89 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: GatewayClass
+metadata:
+  name: stunner-gatewayclass
+spec:
+  controllerName: "stunner.l7mp.io/gateway-operator"
+  parametersRef:
+    group: "stunner.l7mp.io"
+    kind: GatewayConfig
+    name: stunner-gatewayconfig
+    namespace: stunner
+  description: "STUNner is a WebRTC ingress gateway for Kubernetes"
+---
+apiVersion: stunner.l7mp.io/v1
+kind: GatewayConfig
+metadata:
+  name: stunner-gatewayconfig
+  namespace: stunner
+spec:
+  realm: stunner.l7mp.io
+  authType: plaintext
+  userName: "stunneruser"
+  password: "stunnerpassword"
+  loadBalancerServiceAnnotations:
+    service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
+    service.beta.kubernetes.io/aws-load-balancer-type: external
+    service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
+    service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: "true"
+    service.beta.kubernetes.io/aws-load-balancer-target-group-attributes: stickiness.enabled=true,stickiness.type=source_ip
+    service.beta.kubernetes.io/aws-load-balancer-healthcheck-path: /live
+    service.beta.kubernetes.io/aws-load-balancer-healthcheck-port: "8086"
+    service.beta.kubernetes.io/aws-load-balancer-healthcheck-protocol: HTTP
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  annotations:
+    stunner.l7mp.io/enable-mixed-protocol-lb: "true"
+  name: stunner-gateway
+  namespace: stunner
+spec:
+  gatewayClassName: stunner-gatewayclass
+  listeners:
+    - name: udp-listener
+      port: 3478
+      protocol: TURN-UDP
+    - name: tcp-listener
+      port: 3480
+      protocol: TURN-TCP
+---
+apiVersion: stunner.l7mp.io/v1
+kind: UDPRoute
+metadata:
+  name: stunner-hairpin
+  namespace: stunner
+spec:
+  parentRefs:
+    - name: stunner-gateway
+  rules:
+    - backendRefs:
+        - name: stunner-gateway
+          namespace: stunner
+---
+# Static IPs of internet gateways for Firefox compatibility
+apiVersion: stunner.l7mp.io/v1
+kind: StaticService
+metadata:
+  name: static-svc
+  namespace: stunner
+spec:
+  prefixes:
+    - "18.195.84.2/32" # vpc-07039102ed3b5acc7
+    - "18.195.149.57/32"
+    - "18.197.158.220/32"
+    - "3.127.245.162/32"
+---
+apiVersion: stunner.l7mp.io/v1
+kind: UDPRoute
+metadata:
+  name: static-services
+  namespace: stunner
+spec:
+  parentRefs:
+    - name: stunner-gateway
+  rules:
+    - backendRefs:
+        - group: stunner.l7mp.io
+          kind: StaticService
+          name: static-svc
