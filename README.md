@@ -2,7 +2,7 @@
 
 This repo conatains the deployment manifest for a quick start for STUNner in AWS EKS.
 We'll run LiveKit and LiveKit Meet as an example WebRTC service.
-Read more in [my blog post]().
+Read more in [my blog post](https://medium.com/l7mp-technologies/deploying-webrtc-applications-in-aws-eks-a-step-by-step-guide-with-livekit-and-stunner-c94309af4ed8).
 
 ## 1. Prerequisites
 Make sure we have the necessary tools installed and configured. Here’s what you’ll need:
@@ -49,7 +49,7 @@ We'll use `eksctl` to deploy an EKS cluster.
 It’s a command-line utility originally built by Weaveworks (now fully managed by AWS) that significantly simplifies creating and managing EKS clusters. 
 With eksctl, you can define your cluster in a YAML configuration file and create it with a single command.
 Check `cluster.yaml` and modify to your own use-case.
-After that you can simply create an EKS cluster with the following command (usually takes about 10-15 mins to spun up the whole cluster):
+After that you can simply create an EKS cluster with the following command (usually takes about 10-15 mins to spin up the whole cluster):
 ```
 eksctl create cluster -f cluster.yaml
 ```
@@ -139,7 +139,7 @@ helm install stunner stunner/stunner-gateway-operator \
 kubectl apply -f manifests/stunner.yaml
 ```
 
-There are many STUNner and AWS specific happening here, so be sure to check out the blog for more details.
+There are many STUNner and AWS specific happening here, so be sure to check out [my blog post](https://medium.com/l7mp-technologies/deploying-webrtc-applications-in-aws-eks-a-step-by-step-guide-with-livekit-and-stunner-c94309af4ed8) for more details.
 
 ## 6. Deploying LiveKit
 
